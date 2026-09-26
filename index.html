@@ -495,7 +495,7 @@ async function saveFile(name,blob){
 }
 
 /* ---------- CSV import (Google Sheet) ---------- */
-function parseCSV(e){var t=[],r=[],a='',q=false;for(var o=0;o<e.length;o++){var c=e[o];if(c==='"'){if(q&&e[o+1]==='"'){a+='"';o++;}else q=!q;}else if(c===','&&!q){r.push(a.trim());a='';}else if(c==='\n'&&!q){r.push(a.trim());t.push(r);r=[];a='';}else if(c!=='\r'||q)a+=c;}if(q)throw Error(t('csvQuote'));if(a||r.length){r.push(a.trim());t.push(r);}return t;}
+function parseCSV(e){var out=[],r=[],a='',q=false;for(var o=0;o<e.length;o++){var c=e[o];if(c==='"'){if(q&&e[o+1]==='"'){a+='"';o++;}else q=!q;}else if(c===','&&!q){r.push(a.trim());a='';}else if(c==='\n'&&!q){r.push(a.trim());out.push(r);r=[];a='';}else if(c!=='\r'||q)a+=c;}if(q)throw Error(t('csvQuote'));if(a||r.length){r.push(a.trim());out.push(r);}return out;}
 function importCSV(text){
   var rows=parseCSV(text.replace(/^\uFEFF/,'')),hi=rows.findIndex(function(c){return c.indexOf('ประเภท')>=0&&c.indexOf('จำนวนเงิน')>=0;});
   if(hi<0)throw Error(t('csvNoHeader'));
@@ -1033,10 +1033,10 @@ window.addEventListener('online',function(){Object.keys(KEYS).forEach(function(k
 
 /* ---------- auth screen ---------- */
 var box=document.getElementById('auth'),mode='login';
-function authLang(){try{return JSON.parse(localStorage.getItem('golf-finance-html-v1')).state.settings.lang;}catch(e){return (navigator.language||'th').toLowerCase().indexOf('th')===0?'th':'en';}}
+function authLang(){var l;try{l=JSON.parse(localStorage.getItem('golf-finance-html-v1')).state.settings.lang;}catch(e){}if(l==='th'||l==='en')return l;return (navigator.language||'th').toLowerCase().indexOf('th')===0?'th':'en';}
 var AL={th:{login:'เข้าสู่ระบบ',signup:'สมัครใช้งาน',email:'อีเมล',pw:'รหัสผ่าน',pw2:'ยืนยันรหัสผ่าน',name:'ชื่อที่ให้แอปเรียก',namePh:'เช่น กอล์ฟ',signupBtn:'สมัครและเริ่มใช้งาน',resetBtn:'ส่งลิงก์ตั้งรหัสใหม่',loginBtn:'เข้าสู่ระบบ',forgot:'ลืมรหัสผ่าน?',back:'← กลับไปเข้าสู่ระบบ',resetNote:'ใส่อีเมลที่สมัครไว้ ระบบจะส่งลิงก์ตั้งรหัสผ่านใหม่ไปให้',resetOk:'ส่งลิงก์แล้ว กรุณาเช็กอีเมล (รวมถึงโฟลเดอร์สแปม)',pwMismatch:'รหัสผ่านสองช่องไม่ตรงกัน',tag:'รู้ทันเงิน วางแผนปลดหนี้ เก็บเงินถึงเป้า',loading:'กำลังโหลด…',noconfig:'ยังไม่ได้ตั้งค่า Firebase ในไฟล์นี้ (FIREBASE_CONFIG)',netfail:'โหลดระบบล็อกอินไม่ได้ กรุณาตรวจอินเทอร์เน็ตแล้วรีเฟรช',logoutConfirm:'ออกจากระบบ Mindmoney? ข้อมูลจะถูกลบออกจากเครื่องนี้ แต่ยังอยู่ในบัญชีของคุณ'},
  en:{login:'Log in',signup:'Sign up',email:'Email',pw:'Password',pw2:'Confirm password',name:'What should the app call you?',namePh:'e.g. Golf',signupBtn:'Sign up & start',resetBtn:'Send reset link',loginBtn:'Log in',forgot:'Forgot password?',back:'\u2190 Back to log in',resetNote:"Enter the email you signed up with and we'll send a reset link.",resetOk:'Link sent \u2014 check your email (including spam).',pwMismatch:"Passwords don't match",tag:'Know your money. Plan your payoff. Reach your goals.',loading:'Loading\u2026',noconfig:'Firebase is not configured in this file (FIREBASE_CONFIG)',netfail:"Couldn't load sign-in. Check your connection and refresh.",logoutConfirm:'Log out of Mindmoney? Data will be removed from this device, but stays in your account.'}};
-function al(k){return AL[authLang()][k]||AL.th[k];}
+function al(k){return (AL[authLang()]||AL.th)[k]||AL.th[k];}
 document.querySelector('.auth-tag').textContent=al('tag');
 var ERR_TH={'auth/email-already-in-use':'อีเมลนี้สมัครไว้แล้ว ลองเข้าสู่ระบบแทน','auth/invalid-email':'รูปแบบอีเมลไม่ถูกต้อง','auth/weak-password':'รหัสผ่านต้องมีอย่างน้อย 6 ตัวอักษร',
   'auth/invalid-credential':'อีเมลหรือรหัสผ่านไม่ถูกต้อง','auth/wrong-password':'อีเมลหรือรหัสผ่านไม่ถูกต้อง','auth/user-not-found':'ไม่พบบัญชีนี้ ลองสมัครใช้งาน',
